@@ -4,24 +4,12 @@ export async function POST(request: Request) {
   try {
     const { name, email, message } = await request.json();
 
-    console.log("=== CONTACT FORM DEBUG ===");
-    console.log("Form data:", { name, email, message });
-    console.log("API Key exists:", !!process.env.RESEND_API_KEY);
-    console.log("API Key starts with:", process.env.RESEND_API_KEY?.substring(0, 6));
+    console.log("Form submission:", { name, email, message });
 
     // Validation
     if (!name || !email || !message) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "Invalid email address" },
         { status: 400 }
       );
     }
@@ -34,9 +22,9 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("Sending email to Resend...");
+    console.log("Sending email to sami21.good.bad@gmail.com...");
 
-    // Send email using Resend API
+    // Send email to YOU with visitor's info
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -45,23 +33,27 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         from: "onboarding@resend.dev",
-        to: ["samuel.software21@gmail.com"],
-        reply_to: email,
-        subject: `New Portfolio Message from ${name}`,
+        to: ["sami21.good.bad@gmail.com"], // ← ALWAYS SEND TO YOU
+        reply_to: email, // ← VISITOR'S EMAIL (so you can reply)
+        subject: `Portfolio Message from ${name}`,
         html: `
           <div style="font-family: Arial, sans-serif;">
-            <h2>New Message from Portfolio</h2>
+            <h2>📧 New Portfolio Message</h2>
             <p><strong>From:</strong> ${name}</p>
             <p><strong>Email:</strong> ${email}</p>
             <p><strong>Message:</strong></p>
-            <p>${message}</p>
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
+              <p>${message}</p>
+            </div>
+            <br/>
+            <p><em>Click "Reply" to respond to ${name}</em></p>
           </div>
         `,
       }),
     });
 
     const result = await response.json();
-    console.log("Resend API response:", result);
+    console.log("Resend response:", result);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -70,9 +62,9 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("Email sent successfully!");
+    console.log("Email sent successfully to sami21.good.bad@gmail.com");
     return NextResponse.json(
-      { success: true, message: "Email sent successfully" },
+      { success: true, message: "Message sent successfully!" },
       { status: 200 }
     );
   } catch (error) {
